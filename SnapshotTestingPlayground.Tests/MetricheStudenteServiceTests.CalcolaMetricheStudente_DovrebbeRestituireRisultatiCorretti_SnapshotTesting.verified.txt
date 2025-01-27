@@ -1,0 +1,10 @@
+﻿{
+  Studente: {
+    Nome: Mario,
+    Cognome: Rossi,
+    Matricola: N97000123
+  },
+  MediaAritmetica: 25.0,
+  MediaPonderata: 26.6,
+  NumeroDiLodi: 1
+}

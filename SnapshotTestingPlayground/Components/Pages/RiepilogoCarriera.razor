@@ -1,0 +1,102 @@
+﻿@page "/riepilogo-carriera/{Matricola}"
+@using SnapshotTestingPlayground.Models
+@using SnapshotTestingPlayground.Repositories
+@using SnapshotTestingPlayground.Services
+
+<style>
+    .content{
+    margin: 30px;
+    }
+</style>
+
+<h3>Riepilogo Carriera</h3>
+
+@if (Studente is not null)
+{
+    <h4>Studente</h4>
+    <div class="content">
+        <p>Nome: @Studente.Nome</p>
+        <p>Cognome: @Studente.Cognome</p>
+        <p>Matricola: @Studente.Matricola</p>
+    </div>
+
+    @if (RegistrazioniEsami is not null)
+    {
+        <h4>Esami registrati</h4>
+        <table class="table content">
+            <thead>
+                <tr>
+                    <th>Corso</th>
+                    <th>Voto</th>
+                    <th>Lode</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var registrazioneEsame in RegistrazioniEsami)
+                {
+                    <tr>
+                        <td>@registrazioneEsame.Corso.Nome</td>
+                        <td>@registrazioneEsame.Voto</td>
+                        <td>@(registrazioneEsame.Lode ? "Si" : "No")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (MetricheStudente is not null)
+    {
+        <h4>Metriche Studente</h4>
+        <div class="content">
+            <p>Media Aritmetica: @MetricheStudente.MediaAritmetica</p>
+            <p>Media Ponderata: @MetricheStudente.MediaPonderata</p>
+            <p>Numero di Lodi: @MetricheStudente.NumeroDiLodi</p>
+        </div>
+    }
+}
+else
+{
+    <p>Caricamento...</p>
+}
+
+
+
+@code {
+    [Inject]
+    private IStudenteRepository studenteRepository { get; set; } = default!;
+    [Inject]
+    private IMetricheStudenteService metricheStudenteService { get; set; } = default!;
+    [Inject]
+    private IRegistrazioneEsameRepository registrazioneEsameRepository { get; set; } = default!;
+    [Inject]
+    private ILogger<RiepilogoCarriera> logger { get; set; } = default!;
+
+    [Parameter]
+    public string? Matricola { get; set; }
+
+    Studente? Studente = null;
+    MetricheStudente? MetricheStudente = null;
+    IEnumerable<RegistrazioneEsame>? RegistrazioniEsami = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+
+        if (Matricola is null || String.IsNullOrWhiteSpace(Matricola))
+        {
+            logger.LogError("Parametro Matricola non fornito");
+            return;
+        }
+
+        Studente = await studenteRepository.GetStudenteByMatricolaAsync(Matricola);
+        if (Studente is null)
+        {
+            logger.LogError("Studente con matricola '{matricola}' non trovato", Matricola);
+            return;
+        }
+
+        RegistrazioniEsami = await registrazioneEsameRepository.GetEsamiStudenteAsync(Studente);
+        MetricheStudente = await metricheStudenteService.CalcolaMetricheStudenteAsync(Studente);
+    }
+}

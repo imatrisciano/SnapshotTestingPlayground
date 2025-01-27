@@ -1,0 +1,9 @@
+﻿{
+  Type: ArgumentNullException,
+  Message: Value cannot be null.,
+  ParamName: studente,
+  StackTrace:
+at System.ArgumentNullException.Throw(String paramName)
+at System.ArgumentNullException.ThrowIfNull(Object argument, String paramName)
+at SnapshotTestingPlayground.Services.MetricheStudenteService.CalcolaMetricheStudenteAsync(Studente studente)
+}
